@@ -6,6 +6,7 @@ package main.render;
 import main.Config;
 import main.algorithm.DiskNode;
 import main.algorithm.Graph;
+import main.algorithm.SphereNode;
 import main.algorithm.SquareNode;
 import processing.core.PApplet;
 
@@ -40,7 +41,7 @@ public class Canvas extends PApplet
         background(0);
         frameRate(500);
         new Thread(()->{
-            Graph graph = new Graph(10000, DiskNode.class);
+            Graph graph = new Graph(10000, SphereNode.class);
             graph.renderOn(this);
         }).start();
 
@@ -48,12 +49,16 @@ public class Canvas extends PApplet
 
     @Override
     public void settings() {
-        size(Config.X, Config.Y);
+        size(Config.X + 100, Config.Y + 100);
     }
 
     /* put something on the stage */
+    public void updateCamera(){
+        //camera(mouseX, height/2, (height/2) / tan(PI/6), width/2, height/2, 0, 0, 1, 0);
+    }
     public void draw()
     {
+        //this.updateCamera();
         if(this.queue.isEmpty()) return;
         for (int i = 0; !this.queue.isEmpty(); i++) {
             this.queue.remove().renderOn(this);
