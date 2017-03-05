@@ -10,16 +10,18 @@ import main.algorithm.SphereNode;
 import main.algorithm.SquareNode;
 import processing.core.PApplet;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class Canvas extends PApplet
+public class Canvas extends PApplet implements Executable
 {
-    public Queue<Drawable> queue;
+    public LinkedBlockingQueue<Drawable> queue;
     /* main method of sketch */
     static public void main(String[] passedArgs)
     {
+        boolean open =false;
+        assert  open = true;
+        System.out.println(open);
         String[] appletArgs = new String[]{"main.render.Canvas"};
         if (passedArgs != null)
         {
@@ -32,36 +34,38 @@ public class Canvas extends PApplet
     }
 
     public Canvas(){
-        this.queue = new ArrayDeque<>(1000);
+        this.queue = new LinkedBlockingQueue<>();
     }
 
     /* sketch initial setup */
     public void setup()
     {
-        background(0);
-        frameRate(500);
+        background(255);
+        frameRate(60);
         new Thread(()->{
-            Graph graph = new Graph(10000, SphereNode.class);
-            graph.renderOn(this);
+            Graph graph = new Graph(Config.NODE_AMOUNT, SphereNode.class, Canvas.this);
         }).start();
 
     }
 
     @Override
     public void settings() {
-        size(Config.X + 100, Config.Y + 100);
+        size(Config.X + 2*Config.CANVAS_MARGIN, Config.Y+ 2*Config.CANVAS_MARGIN);
     }
 
     /* put something on the stage */
-    public void updateCamera(){
-        //camera(mouseX, height/2, (height/2) / tan(PI/6), width/2, height/2, 0, 0, 1, 0);
-    }
     public void draw()
     {
         //this.updateCamera();
         if(this.queue.isEmpty()) return;
-        for (int i = 0; !this.queue.isEmpty(); i++) {
-            this.queue.remove().renderOn(this);
+        for (int i = 0; i < 100 && !this.queue.isEmpty(); i++) {
+            Drawable d = this.queue.poll();
+            d.renderOn(this);
         }
+    }
+
+    @Override
+    public void push(Drawable task) {
+        this.queue.add(task);
     }
 }
