@@ -15,6 +15,14 @@ public class DiskNode extends Node {
         public float x;
         public float y;
 
+        @Override
+        public String toString() {
+            return "Polar2{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
+        }
+
         static final String cellFormat = "%d, %d";
 
         static class Iterator extends CellIterator {
@@ -24,7 +32,7 @@ public class DiskNode extends Node {
             int idx = 0;
 
             // put self at the end to make sure at least one iteration
-            int[] dx = {-1, 1, 0, 1, 0};
+            int[] dx = {1, 1, 0, 1, 0};
             int[] dy = {-1, 0, 1, 1, 0};
 
             public Iterator(float x, float y) {
@@ -96,16 +104,18 @@ public class DiskNode extends Node {
     }
 
     @Override
-    public void renderOn(Canvas canvas) {
+    void renderOn(Canvas canvas, int color) {
         canvas.noStroke();
-        canvas.fill(colors[0]);
+        int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
+        canvas.fill(r, g, b);
         Polar2 c = (Polar2) coordinate;
         float halfX = Config.X / 2, halfY = Config.Y / 2;
         canvas.ellipse(c.x * Config.R + halfX + Config.CANVAS_MARGIN, c.y * Config.R + halfY + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
-    public void renderEdgeTo(Canvas canvas, Node other) {
+    void renderEdgeTo(Canvas canvas, Node other, int color) {
+        canvas.stroke(color);
         Polar2 a = (Polar2) coordinate, o = (Polar2) ((DiskNode) other).coordinate;
         float halfX = Config.X / 2, halfY = Config.Y / 2;
         canvas.line(a.x * Config.R + halfX + Config.CANVAS_MARGIN,

@@ -53,7 +53,7 @@ public class SphereNode extends Node {
                 int x = this.x + dx[idx],
                         y = this.y + dy[idx],
                         z = this.z + dz[idx++];
-                while (x >= MAX_X || y >= MAX_Y || x < 0 || y < 0) {
+                while (x >= MAX_X || y >= MAX_Y || z >= MAX_Z || x < 0 || y < 0 || z < 0) {
                     x = this.x + dx[idx];
                     y = this.y + dy[idx];
                     z = this.z + dz[idx++];
@@ -106,16 +106,18 @@ public class SphereNode extends Node {
     }
 
     @Override
-    public void renderOn(Canvas canvas) {
+    public void renderOn(Canvas canvas, int color) {
         canvas.noStroke();
-        canvas.fill(colors[0]);
         Cartesian3 c = (Cartesian3) coordinate;
+        int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
+        canvas.fill(r, g, b);
         float halfX = Config.X / 2, halfY = Config.Y / 2;
-        canvas.ellipse(c.x * Config.X / 2f + halfX + +Config.CANVAS_MARGIN, c.y * Config.Y / 2f + halfY + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
+        canvas.ellipse(c.x * Config.X + halfX + +Config.CANVAS_MARGIN, c.y * Config.Y + halfY + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
-    public void renderEdgeTo(Canvas canvas, Node other) {
+    void renderEdgeTo(Canvas canvas, Node other, int color) {
+        canvas.stroke(color);
         Cartesian3 a = (Cartesian3) coordinate, o = (Cartesian3) ((SphereNode) other).coordinate;
         float halfX = Config.X / 2, halfY = Config.Y / 2;
         canvas.line(a.x * Config.R + halfX + Config.CANVAS_MARGIN,

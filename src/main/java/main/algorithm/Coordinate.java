@@ -34,7 +34,7 @@ public abstract class Coordinate implements Comparable<Coordinate> {
     abstract static class CellIterator {
         static final int MAX_X = Config.UNIT_AMOUNT;
         static final int MAX_Y = Config.UNIT_AMOUNT;
-
+        static final int MAX_Z = Config.UNIT_AMOUNT;
         abstract boolean hasNext();
 
         abstract String next();

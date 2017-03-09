@@ -4,13 +4,10 @@
 package main.render;
 
 import main.Config;
-import main.algorithm.DiskNode;
-import main.algorithm.Graph;
-import main.algorithm.SphereNode;
+import main.algorithm.ColorGraph;
 import main.algorithm.SquareNode;
 import processing.core.PApplet;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Canvas extends PApplet implements Executable
@@ -43,7 +40,23 @@ public class Canvas extends PApplet implements Executable
         background(255);
         frameRate(60);
         new Thread(()->{
-            Graph graph = new Graph(Config.NODE_AMOUNT, SphereNode.class, Canvas.this);
+            long startMili = System.currentTimeMillis();
+            ColorGraph graph = new ColorGraph(Config.NODE_AMOUNT, SquareNode.class, this);
+            int total = Math.min(graph.total, 4);
+            for (int i = 0; i < total; i++) {
+                graph.renderAccordingTo(i);
+            }
+            for (int i = 0; i < total; i++) {
+                for (int j = i; j < total; j++) {
+                    if (j == i) continue;
+                    graph.renderBipartiteOf(i, j);
+                }
+            }
+            long endMili = System.currentTimeMillis();
+            System.out.println("total: " + (endMili - startMili) / 1000f);
+            this.push(c -> {
+                System.exit(0);
+            });
         }).start();
 
     }
@@ -58,14 +71,27 @@ public class Canvas extends PApplet implements Executable
     {
         //this.updateCamera();
         if(this.queue.isEmpty()) return;
-        for (int i = 0; i < 100 && !this.queue.isEmpty(); i++) {
+        for (int i = 0; i < 1000 && !this.queue.isEmpty(); i++) {
             Drawable d = this.queue.poll();
             d.renderOn(this);
         }
     }
 
     @Override
+    public void mouseClicked() {
+        System.out.println(String.format("cell index: %d, %d",
+                (int) Math.floor((mouseX * Config.LEGAL_DISTANCE)),
+                (int) Math.floor((mouseY * Config.LEGAL_DISTANCE))));
+        super.mouseClicked();
+    }
+
+    @Override
     public void push(Drawable task) {
         this.queue.add(task);
+    }
+
+    @Override
+    public void save(String filename) {
+        super.save("./render/" + filename);
     }
 }

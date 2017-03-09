@@ -4,12 +4,9 @@ import main.Config;
 import main.render.Canvas;
 import main.render.Drawable;
 import main.render.Executable;
-import processing.core.PApplet;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -17,38 +14,93 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public abstract class Node implements Comparable<Node>, Drawable {
     Coordinate coordinate;
-    int[] colors = {100};
-    final int EdgeColor = 200;
+    private static int innerIndex = 0;
+    private int _index = innerIndex++;
+    static int[] colors;
 
-    public HashSet<Node> getConnected() {
+    static {
+        int color = 255, total = 100, step = 255 / total;
+        colors = new int[total];
+        for (int i = 0; i < total; i++) {
+            colors[i] = ThreadLocalRandom.current().nextInt(0x30, 0xde)
+                    + (ThreadLocalRandom.current().nextInt(0x30, 0xde) << 8)
+                    + (ThreadLocalRandom.current().nextInt(0x30, 0xde) << 16);
+        }
+    }
+
+    int coloringIndex;
+
+    public int getColoringIndex() {
+        return coloringIndex;
+    }
+
+    public void setColoringIndex(int coloringIndex) {
+        this.coloringIndex = coloringIndex;
+    }
+
+    public int getColorIndex() {
+        return colorIndex;
+    }
+
+    public void setColorIndex(int colorIndex) {
+        this.colorIndex = colorIndex;
+    }
+
+    public int getColor() {
+        if (this.colorIndex == -1) return 0x909090;
+        return colors[colorIndex];
+    }
+
+    int colorIndex = -1;
+    final int EdgeColor = 210;
+
+    public ArrayList<Node> getConnected() {
         return connected;
     }
 
-    private HashSet<Node> connected = new HashSet<>(Config.AVG_DEGREE * 2);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj.getClass() != this.getClass()) return false;
+        return this._index == ((Node) obj)._index;
+    }
 
-    public abstract void renderOn(Canvas canvas);
+    private ArrayList<Node> connected = new ArrayList<>(Config.AVG_DEGREE * 2);
 
-    public abstract void renderEdgeTo(Canvas canvas, Node other);
+    public void renderOn(Canvas canvas) {
+        renderOn(canvas, getColor());
+    }
 
-    public void connect(Hashtable<String, HashSet<Node>> cells, Executable target) {
+    ;
+
+    abstract void renderOn(Canvas canvas, int color);
+
+    abstract void renderEdgeTo(Canvas canvas, Node other, int color);
+
+    public void renderEdgeTo(Canvas canvas, Node other) {
+        renderEdgeTo(canvas, other, EdgeColor);
+    }
+
+    // TODO: Contains operation of the Set Data Structure spends too much time
+    public void connect(Hashtable<String, ArrayList<Node>> cells, Executable target) {
         Coordinate.CellIterator itr = coordinate.getCellIterator();
-        String idx = itr.next();
         while (itr.hasNext()) {
-            HashSet<Node> nodes = cells.get(idx);
-            if(nodes == null) return;
-            assert nodes != null;
-            nodes.forEach(node -> {
-                if (coordinate.SquaredDistance(node.coordinate, coordinate) > Config.LEGAL_SQUARE_DISTANCE)
-                    connected.add(node);
-                node.connected.add(this);
+            String idx = itr.next();
+            ArrayList<Node> nodes = cells.get(idx);
+            if (nodes == null) continue;
+            for (Node node : nodes) {
+                if (coordinate.SquaredDistance(node.coordinate, coordinate) > Config.LEGAL_SQUARE_DISTANCE || node.equals(this)) {
+//                    System.out.println(coordinate.toString() + " "
+//                            + node.coordinate.toString() + "" + coordinate.SquaredDistance(node.coordinate, coordinate));
+                    continue;
+                }
+                connected.add(node);
+                node.getConnected().add(this);
                 if (Config.WILL_DRAW) {
                     target.push(c -> {
-                        c.stroke(EdgeColor);
                         renderEdgeTo(c, node);
                     });
                 }
-            });
-            idx = itr.next();
+            }
         }
     }
 }

@@ -13,6 +13,14 @@ public class SquareNode extends Node {
         public float x;
         public float y;
 
+        @Override
+        public String toString() {
+            return "Cartesian{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
+        }
+
         static final String cellFormat = "%d, %d";
         static class Iterator extends CellIterator {
             final int x;
@@ -21,7 +29,7 @@ public class SquareNode extends Node {
             int idx = 0;
 
             // put self at the end to make sure at least one iteration
-            int[] dx = {-1, 1, 0, 1, 0};
+            int[] dx = {1, 1, 0, 1, 0};
             int[] dy = {-1, 0, 1, 1, 0};
 
             public Iterator(float x, float y) {
@@ -89,15 +97,17 @@ public class SquareNode extends Node {
     }
 
     @Override
-    public void renderOn(Canvas canvas) {
+    void renderOn(Canvas canvas, int color) {
         canvas.noStroke();
-        canvas.fill(colors[0]);
+        int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
+        canvas.fill(r, g, b);
         Cartesian c = (Cartesian) coordinate;
         canvas.ellipse(c.x * Config.X + Config.CANVAS_MARGIN, c.y * Config.Y + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
-    public void renderEdgeTo(Canvas canvas, Node other) {
+    void renderEdgeTo(Canvas canvas, Node other, int color) {
+        canvas.stroke(color);
         Cartesian a = (Cartesian) coordinate, o = (Cartesian) ((SquareNode) other).coordinate;
         canvas.line(a.x * Config.X + Config.CANVAS_MARGIN, a.y * Config.Y + Config.CANVAS_MARGIN, o.x * Config.X + Config.CANVAS_MARGIN, o.y * Config.Y + Config.CANVAS_MARGIN);
     }

@@ -5,14 +5,16 @@ package main;
  */
 public class Config {
     public static final int NODE_AMOUNT = 1000;
-    public static final int AVG_DEGREE = 64;
-    public static final int R = 500;
-    public static final int X = Config.R + Config.R;
-    public static final int Y = Config.R + Config.R;
-    public static final int Z = Config.R + Config.R;
-    public static final int CANVAS_MARGIN = 100;
-    public static final int NODE_SIZE = 5;
-    public static final float LEGAL_DISTANCE = (float) (Math.sqrt(64f / 4000f) / Math.PI);
+    public static final int AVG_DEGREE = 16;
+    public static final int R = 800;
+    public static final int X = Config.R;
+    public static final int Y = Config.R;
+    public static final int Z = Config.R;
+    public static final int CANVAS_MARGIN = 10;
+    public static int NODE_SIZE = R / 200;
+    public static final float LEGAL_DISTANCE = (float) (Math.sqrt(0.5 * (float) AVG_DEGREE / (float) NODE_AMOUNT)); // for disk
+    //    public static final float LEGAL_DISTANCE = (float) (Math.sqrt(AVG_DEGREE/(float)NODE_AMOUNT/Math.PI)); // for square
+//    public static final float LEGAL_DISTANCE = (float) (Math.sqrt(AVG_DEGREE/(float)NODE_AMOUNT)); // for shpere
     public static final float LEGAL_SQUARE_DISTANCE = LEGAL_DISTANCE * LEGAL_DISTANCE;
     public static final int UNIT_AMOUNT = (int) Math.ceil(1 / Config.LEGAL_DISTANCE);
     public static final boolean WILL_DRAW = true;
