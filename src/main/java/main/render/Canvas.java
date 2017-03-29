@@ -5,6 +5,8 @@ package main.render;
 
 import main.Config;
 import main.algorithm.ColorGraph;
+import main.algorithm.DiskNode;
+import main.algorithm.SphereNode;
 import main.algorithm.SquareNode;
 import processing.core.PApplet;
 
@@ -41,7 +43,21 @@ public class Canvas extends PApplet implements Executable
         frameRate(60);
         new Thread(()->{
             long startMili = System.currentTimeMillis();
-            ColorGraph graph = new ColorGraph(Config.NODE_AMOUNT, SquareNode.class, this);
+            ColorGraph graph;
+            switch (Config.type) {
+                case "square":
+                    graph = new ColorGraph(Config.NODE_AMOUNT, SquareNode.class, this);
+                    break;
+                case "disk":
+                    graph = new ColorGraph(Config.NODE_AMOUNT, DiskNode.class, this);
+                    break;
+                case "sphere":
+                    graph = new ColorGraph(Config.NODE_AMOUNT, SphereNode.class, this);
+                    break;
+                default:
+                    graph = new ColorGraph(Config.NODE_AMOUNT, SquareNode.class, this);
+                    break;
+            }
             int total = Math.min(graph.total, 4);
             for (int i = 0; i < total; i++) {
                 graph.renderAccordingTo(i);
@@ -54,6 +70,7 @@ public class Canvas extends PApplet implements Executable
             }
             long endMili = System.currentTimeMillis();
             System.out.println("total: " + (endMili - startMili) / 1000f);
+            graph.exportDistribution(Config.exportPath + "distribution.csv");
             this.push(c -> {
                 System.exit(0);
             });
@@ -92,6 +109,6 @@ public class Canvas extends PApplet implements Executable
 
     @Override
     public void save(String filename) {
-        super.save("./render/" + filename);
+        super.save(Config.exportPath + filename);
     }
 }

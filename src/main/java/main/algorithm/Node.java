@@ -15,6 +15,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class Node implements Comparable<Node>, Drawable {
     Coordinate coordinate;
     private static int innerIndex = 0;
+
+    public int getInnerIndex() {
+        return _index;
+    }
+
     private int _index = innerIndex++;
     static int[] colors;
 

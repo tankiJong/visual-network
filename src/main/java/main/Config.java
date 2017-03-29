@@ -4,8 +4,9 @@ package main;
  * Created by tanki on 2017/2/25.
  */
 public class Config {
-    public static final int NODE_AMOUNT = 1000;
-    public static final int AVG_DEGREE = 16;
+    public static final String type = "disk";
+    public static final int NODE_AMOUNT = 4000;
+    public static final int AVG_DEGREE = 32;
     public static final int R = 800;
     public static final int X = Config.R;
     public static final int Y = Config.R;
@@ -18,4 +19,5 @@ public class Config {
     public static final float LEGAL_SQUARE_DISTANCE = LEGAL_DISTANCE * LEGAL_DISTANCE;
     public static final int UNIT_AMOUNT = (int) Math.ceil(1 / Config.LEGAL_DISTANCE);
     public static final boolean WILL_DRAW = true;
+    public static final String exportPath = "./" + Config.type + "-node-" + Config.NODE_AMOUNT + "-avg-" + Config.AVG_DEGREE + "/";
 }

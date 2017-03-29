@@ -19,7 +19,7 @@ public abstract class Coordinate implements Comparable<Coordinate> {
 
     public abstract String getCellIndex();
 
-    public abstract void randomlyInit();
+    abstract void randomlyInit();
 
     public abstract double SquaredDistance(Coordinate a, Coordinate b);
 

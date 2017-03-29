@@ -3,6 +3,8 @@ package main.algorithm;
 import main.Config;
 import main.render.Executable;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -48,6 +50,18 @@ public class ColorGraph extends Graph {
         this.total = -1;
     }
 
+    public void exportDistribution(String nameWithPath) {
+        try {
+            FileWriter fw = new FileWriter(nameWithPath);
+            fw.write("id,degree,color\n");
+            for (Node node : nodes) {
+                fw.write(String.format("%d,%d,%d\n", node.getInnerIndex(), node.getConnected().size(), node.getColorIndex()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
     public void renderAccordingTo(int i) {
         this.renderTarget.push(c -> {
             c.clear();
@@ -180,9 +194,9 @@ public class ColorGraph extends Graph {
                     degs[i]--;
                 }
 
-                renderTarget.push(c -> {
-                    now.renderEdgeTo(c, adjcent, 255);
-                });
+//                renderTarget.push(c -> {
+//                    now.renderEdgeTo(c, adjcent, 255);
+//                });
             }
 //            for (int j = q + 1; j < end - 1; j++) {
 //                assert degs[j] <= degs[j + 1] : "q: " + q + ", " + j + ": " + degs[j] + ", " + (j + 1) + ": " + degs[j + 1];
