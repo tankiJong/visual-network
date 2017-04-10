@@ -40,7 +40,7 @@ public class Canvas extends PApplet implements Executable
     public void setup()
     {
         background(255);
-        frameRate(60);
+        frameRate(120);
         new Thread(()->{
             long startMili = System.currentTimeMillis();
             ColorGraph graph;
@@ -59,9 +59,9 @@ public class Canvas extends PApplet implements Executable
                     break;
             }
             int total = Math.min(graph.total, 4);
-            for (int i = 0; i < total; i++) {
-                graph.renderAccordingTo(i);
-            }
+//            for (int i = 0; i < total; i++) {
+//                graph.renderAccordingTo(i);
+//            }
             for (int i = 0; i < total; i++) {
                 for (int j = i; j < total; j++) {
                     if (j == i) continue;
@@ -71,6 +71,7 @@ public class Canvas extends PApplet implements Executable
             long endMili = System.currentTimeMillis();
             System.out.println("total: " + (endMili - startMili) / 1000f);
             graph.exportDistribution(Config.exportPath + "distribution.csv");
+            graph.exportStatistic(Config.exportPath + "statistics.csv");
             this.push(c -> {
                 System.exit(0);
             });
@@ -88,7 +89,7 @@ public class Canvas extends PApplet implements Executable
     {
         //this.updateCamera();
         if(this.queue.isEmpty()) return;
-        for (int i = 0; i < 1000 && !this.queue.isEmpty(); i++) {
+        for (int i = 0; i < 100000 && !this.queue.isEmpty(); i++) {
             Drawable d = this.queue.poll();
             d.renderOn(this);
         }

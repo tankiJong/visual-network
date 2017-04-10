@@ -14,15 +14,17 @@ import java.util.Comparator;
  */
 public class ColorGraph extends Graph {
     public final int total;
+    int maxColor;
+    int maxDegWhenDeleted;
 
     public ColorGraph(int size, Class<? extends Node> type, Executable... renderTarget) {
         super(size, type, renderTarget);
         this.total = coloring(smallestOrdering(nodes));
         System.out.println("color finished");
-        this.renderTarget.push(this);
-        this.renderTarget.push(c -> {
-            c.save("node-colored.jpg");
-        });
+//        this.renderTarget.push(this);
+//        this.renderTarget.push(c -> {
+//            c.save("node-colored.jpg");
+//        });
     }
 
     static public void main(String[] passedArgs) {
@@ -43,6 +45,8 @@ public class ColorGraph extends Graph {
         }
         long endMili = System.currentTimeMillis();
         System.out.println("total: " + (endMili - startMili) / 1000f);
+        graph.exportDistribution(Config.exportPath + "distribution.csv");
+        graph.exportStatistic(Config.exportPath + "statistics.txt");
     }
 
     private ColorGraph() {
@@ -53,14 +57,32 @@ public class ColorGraph extends Graph {
     public void exportDistribution(String nameWithPath) {
         try {
             FileWriter fw = new FileWriter(nameWithPath);
-            fw.write("id,degree,color\n");
+            fw.write("id,degree,color, deleteIndex, degreeWhenRemoved\n");
             for (Node node : nodes) {
-                fw.write(String.format("%d,%d,%d\n", node.getInnerIndex(), node.getConnected().size(), node.getColorIndex()));
+                fw.write(String.format("%d,%d,%d,%d,%d\n", node.getInnerIndex(), node.getConnected().size(), node.getColorIndex(), Config.NODE_AMOUNT - node.getColoringIndex() - 1, node.degreeWhenRemoved));
             }
+            fw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void exportStatistic(String nameWithPath) {
+        try {
+            FileWriter fw = new FileWriter(nameWithPath);
+            fw.write("n,r,e,mindeg,maxdeg,degdeleted,color, moscolorsiz,clique\n");
+            fw.write(Config.NODE_AMOUNT + ",");
+            fw.write(Config.LEGAL_DISTANCE + ",");
+            fw.write(E + ",");
+            fw.write(minDegNode.getConnected().size() + ",");
+            fw.write(maxDegNode.getConnected().size() + ",");
+            fw.write(",");
+            fw.write(maxColor + ",,");
+            fw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     public void renderAccordingTo(int i) {
         this.renderTarget.push(c -> {
@@ -78,13 +100,17 @@ public class ColorGraph extends Graph {
     }
 
     public void renderBipartiteOf(int i, int j) {
+        System.out.println("bipartite-" + i + "-" + j);
         this.renderTarget.push(c -> {
             c.clear();
             c.background(255);
-            this.renderGraph(c, false);
+//            this.renderGraph(c, false);
         });
+        int V = 0;
+        int E = 0;
         for (Node node : nodes) {
             if (node.getColorIndex() != i) continue;
+            V++;
             this.renderTarget.push(node);
             for (Node connected : node.getConnected()) {
                 if (connected.getColorIndex() == i) {
@@ -97,20 +123,22 @@ public class ColorGraph extends Graph {
                 this.renderTarget.push(c -> {
                     node.renderEdgeTo(c, connected);
                 });
+                E++;
             }
         }
-        String name = "bipartite-" + i + "-" + j + ".jpg";
+        E = E / 2;
+        String name = "bipartite-" + i + "-" + j + " V-" + V + "E-" + E + ".jpg";
         this.renderTarget.push(c -> {
             c.save(name);
         });
     }
 
     public int coloring(Node[] nodes) {
-        for (Node n : nodes) {
-            this.renderTarget.push(c -> {
-                n.renderOn(c, 0xEEEEEE);
-            });
-        }
+//        for (Node n : nodes) {
+//            this.renderTarget.push(c -> {
+//                n.renderOn(c, 0xEEEEEE);
+//            });
+//        }
         int maxColor = 1;
         for (int idx = nodes.length - 1; idx >= 0; idx--) {
             Node now = nodes[idx];
@@ -135,11 +163,12 @@ public class ColorGraph extends Graph {
 //                    if(node.getColorIndex() == c.getColorIndex() && node.getColorIndex() != -1){
 //                        int ser =12;
 //                    }
-            for (int i = 0; i < 100; i++) {
-                this.renderTarget.push(now);
-            }
+//            for (int i = 0; i < 100; i++) {
+//                this.renderTarget.push(now);
+//            }
         }
         System.out.println("total colors: " + maxColor);
+        this.maxColor = maxColor;
         return maxColor;
     }
 
@@ -157,11 +186,13 @@ public class ColorGraph extends Graph {
         int q = 0, end = wrappers.length;
         while (q < end) {
             Node now = wrappers[q];
+            now.degreeWhenRemoved = degs[q];
+            if (degs[q] > maxDegWhenDeleted) maxDegWhenDeleted = degs[q];
             assert q == now.coloringIndex : q + " " + now.coloringIndex;
             ArrayList<Node> connected = now.getConnected();
-            renderTarget.push(c -> {
-                now.renderOn(c, 0xFFFFFF);
-            });
+//            renderTarget.push(c -> {
+//                now.renderOn(c, 0xFFFFFF);
+//            });
             int i = q + 1;
             if (i == end) break;
             // all connected degree -1,
@@ -169,10 +200,10 @@ public class ColorGraph extends Graph {
                 i = adjcent.getColoringIndex();
                 if (i < q) continue;
 
-                // TODO: in sequence: ... x, x+i ..., which i>=0, only when i = 0. we need swap.(x>=x+i && x+i-1 < x) That means we need to swap it with the value x with smallest index.
+                // TODO: in sequence: ... x, x+i ..., which i>=0, only when i = 0. we need swap.(x<=x+i && x+i-1 < x) That means we need to swap it with the value x with smallest index.
                 int j = i - 1;
                 if (degs[i] == degs[j]) {
-                    j--;
+//                    j--;
                     while (j > q) {
                         if (degs[j] != degs[i]) {
                             break;

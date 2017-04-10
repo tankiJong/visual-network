@@ -11,9 +11,12 @@ import java.util.Hashtable;
 /**
  * Created by tanki on 2017/2/25.
  */
-public class Graph implements Drawable{
+public class Graph implements Drawable {
     private final boolean renderable;
     final Executable renderTarget;
+    Node minDegNode = null;
+    Node maxDegNode = null;
+    int E;
 
     static public void main(String[] passedArgs) {
         boolean open = false;
@@ -27,14 +30,16 @@ public class Graph implements Drawable{
 
     Graph() {
         this.renderable = false;
-        renderTarget = e -> {};
+        renderTarget = e -> {
+        };
     }
 
     ArrayList<Node> nodes;
 
-    public Graph(int size, Class<? extends Node> type, Executable... renderTarget){
+    public Graph(int size, Class<? extends Node> type, Executable... renderTarget) {
         this.renderable = renderTarget.length != 0;
-        this.renderTarget = renderTarget.length == 0 ? e -> {} : renderTarget[0];
+        this.renderTarget = renderTarget.length == 0 ? e -> {
+        } : renderTarget[0];
         this.nodes = new ArrayList<Node>(size);
         Hashtable<String, ArrayList<Node>> cells = new Hashtable<>(Config.UNIT_AMOUNT * Config.UNIT_AMOUNT);
         for (int i = 0; i < size; i++) {
@@ -68,8 +73,61 @@ public class Graph implements Drawable{
 //                c.save("./render/node-with-edge-"+j+".jpg");
 //            });
         }
+        for (ArrayList<Node> cell : cells.values()) {
+            for (Node node : cell) {
+                cell.forEach(n -> {
+                    if (!n.equals(node)) {
+                        node.getConnected().add(n);
+                    }
+                });
+            }
+        }
+        for (Node node : nodes) {
+            int size = node.getConnected().size();
+            E += size;
+            if (maxDegNode == null) {
+                maxDegNode = node;
+                continue;
+            }
+            if (minDegNode == null) {
+                minDegNode = node;
+                continue;
+            }
+            if (size > maxDegNode.getConnected().size()) {
+                maxDegNode = node;
+            }
+            if (size < minDegNode.getConnected().size()) {
+                minDegNode = node;
+            }
+        }
+        E /= 2;
         System.out.println("edge connect finished");
 //        this.renderTarget.push(this);
+        this.renderTarget.push(canvas -> {
+            Config.NODE_SIZE *= 2;
+            Coordinate c = this.maxDegNode.coordinate;
+            int color = 0xcd1212;
+            int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
+            canvas.noFill();
+            canvas.stroke(r, g, b);
+            float halfX = Config.X / 2, halfY = Config.Y / 2;
+            canvas.ellipse(c.getScreenX(), c.getScreenY(),
+                    Config.LEGAL_DISTANCE * Config.X, Config.LEGAL_DISTANCE * Config.Y);
+
+            this.maxDegNode.renderOn(canvas, 0xcd1212);
+
+            c = this.minDegNode.coordinate;
+            color = 0x0e0eea;
+            r = (color & 0xFF0000) >> 16;
+            g = (color & 0x00FF00) >> 8;
+            b = (color & 0x0000FF);
+            canvas.noFill();
+            canvas.stroke(r, g, b);
+            canvas.ellipse(c.getScreenX(), c.getScreenY(),
+                    Config.LEGAL_DISTANCE * Config.X, Config.LEGAL_DISTANCE * Config.Y);
+            this.minDegNode.renderOn(canvas, 0x0e0eea);
+            Config.NODE_SIZE /= 2;
+        });
         this.renderTarget.push(c -> {
             c.save("node-with-edge.jpg");
         });

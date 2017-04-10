@@ -11,6 +11,29 @@ public abstract class Coordinate implements Comparable<Coordinate> {
 //        POLAR2,
 //        POLAR3
 //    };
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    float x;
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    abstract float getScreenX();
+
+    abstract float getScreenY();
+
+    float y;
     abstract CellIterator getCellIterator();
 
     public Coordinate() {

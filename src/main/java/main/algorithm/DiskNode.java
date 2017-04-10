@@ -12,9 +12,6 @@ import static java.lang.Math.PI;
  */
 public class DiskNode extends Node {
     public static class Polar2 extends Coordinate {
-        public float x;
-        public float y;
-
         @Override
         public String toString() {
             return "Polar2{" +
@@ -32,8 +29,8 @@ public class DiskNode extends Node {
             int idx = 0;
 
             // put self at the end to make sure at least one iteration
-            int[] dx = {1, 1, 0, 1, 0};
-            int[] dy = {-1, 0, 1, 1, 0};
+            int[] dx = {1, 1, 0, 1};
+            int[] dy = {-1, 0, 1, 1};
 
             public Iterator(float x, float y) {
                 assert x + 0.5 <=1 && x + 0.5 >= 0;
@@ -51,12 +48,22 @@ public class DiskNode extends Node {
             public String next() {
                 int x = this.x + dx[idx],
                         y = this.y + dy[idx++];
-                while (x >= MAX_X || y >= MAX_Y || x < 0 || y < 0) {
-                    x = this.x + dx[idx];
-                    y = this.y + dy[idx++];
-                }
+//                while (x >= MAX_X || y >= MAX_Y || x < 0 || y < 0) {
+//                    x = this.x + dx[idx];
+//                    y = this.y + dy[idx++];
+//                }
                 return String.format(cellFormat, x, y);
             }
+        }
+
+        @Override
+        float getScreenX() {
+            return getX() * Config.R + Config.X / 2 + Config.CANVAS_MARGIN;
+        }
+
+        @Override
+        float getScreenY() {
+            return getY() * Config.R + Config.Y / 2 + Config.CANVAS_MARGIN;
         }
 
         @Override
@@ -75,8 +82,8 @@ public class DiskNode extends Node {
         public void randomlyInit() {
             float rho = (float) Math.sqrt(ThreadLocalRandom.current().nextFloat()),
                     theta = (float) (ThreadLocalRandom.current().nextFloat() * 2 * PI);
-            this.x = (float) (rho * Math.cos(theta))/2;
-            this.y = (float) (rho * Math.sin(theta))/2;
+            setX((float) (rho * Math.cos(theta)) / 2);
+            setY((float) (rho * Math.sin(theta)) / 2);
         }
 
         @Override
@@ -108,19 +115,18 @@ public class DiskNode extends Node {
         canvas.noStroke();
         int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
         canvas.fill(r, g, b);
-        Polar2 c = (Polar2) coordinate;
+        Coordinate c = coordinate;
         float halfX = Config.X / 2, halfY = Config.Y / 2;
-        canvas.ellipse(c.x * Config.R + halfX + Config.CANVAS_MARGIN, c.y * Config.R + halfY + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
+        canvas.ellipse(c.getScreenX(), c.getScreenY(), Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
     void renderEdgeTo(Canvas canvas, Node other, int color) {
         canvas.stroke(color);
-        Polar2 a = (Polar2) coordinate, o = (Polar2) ((DiskNode) other).coordinate;
-        float halfX = Config.X / 2, halfY = Config.Y / 2;
-        canvas.line(a.x * Config.R + halfX + Config.CANVAS_MARGIN,
-                a.y * Config.R + halfY + Config.CANVAS_MARGIN,
-                o.x * Config.R + halfX + Config.CANVAS_MARGIN,
-                o.y  * Config.R + halfY + Config.CANVAS_MARGIN);
+        Coordinate a = coordinate, o = other.coordinate;
+        canvas.line(a.getScreenX(),
+                a.getScreenY(),
+                o.getScreenX(),
+                o.getScreenY());
     }
 }

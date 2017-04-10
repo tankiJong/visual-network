@@ -12,11 +12,18 @@ import static java.lang.Math.*;
  */
 public class SphereNode extends Node {
     public static class Cartesian3 extends Coordinate {
-        public float x;
-        public float y;
         public float z;
 
         static final String cellFormat = "%d, %d, %d";
+
+        float getScreenX() {
+            return getX() * Config.X + Config.X / 2 + Config.CANVAS_MARGIN;
+        }
+
+        @Override
+        float getScreenY() {
+            return getY() * Config.R + Config.Y / 2 + Config.CANVAS_MARGIN;
+        }
 
         @Override
         CellIterator getCellIterator() {
@@ -30,9 +37,9 @@ public class SphereNode extends Node {
             int idx = 0;
 
             // put self at the end to make sure at least one iteration
-            int[] dx = {1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0};
-            int[] dy = {1, 1, 1, 1, 0, 0, 0, -1, -1, -1, 0};
-            int[] dz = {1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0};
+            int[] dx = {1, 1, 0, 0, 1, 1, 0, 1, 1, 0};
+            int[] dy = {1, 1, 1, 1, 0, 0, 0, -1, -1, -1};
+            int[] dz = {1, 0, 1, 0, 0, 1, 1, 1, 0, 1};
 
             public Iterator(float x, float y, float z) {
                 assert x + 0.5 <= 1 && x + 0.5 >= 0;
@@ -53,11 +60,11 @@ public class SphereNode extends Node {
                 int x = this.x + dx[idx],
                         y = this.y + dy[idx],
                         z = this.z + dz[idx++];
-                while (x >= MAX_X || y >= MAX_Y || z >= MAX_Z || x < 0 || y < 0 || z < 0) {
-                    x = this.x + dx[idx];
-                    y = this.y + dy[idx];
-                    z = this.z + dz[idx++];
-                }
+//                while (x >= MAX_X || y >= MAX_Y || z >= MAX_Z || x < 0 || y < 0 || z < 0) {
+//                    x = this.x + dx[idx];
+//                    y = this.y + dy[idx];
+//                    z = this.z + dz[idx++];
+//                }
                 return String.format(cellFormat, x, y, z);
             }
         }
@@ -75,8 +82,8 @@ public class SphereNode extends Node {
         public void randomlyInit() {
             double u = ThreadLocalRandom.current().nextFloat() * 2 - 1;
             double theta = ThreadLocalRandom.current().nextFloat() * 2 * PI;
-            this.x = (float) (sqrt(1 - u * u) * cos(theta)) / 2;
-            this.y = (float) (sqrt(1 - u * u) * sin(theta)) / 2;
+            setX((float) (sqrt(1 - u * u) * cos(theta)) / 2);
+            setY((float) (sqrt(1 - u * u) * sin(theta)) / 2);
             this.z = (float) u / 2;
         }
 
@@ -108,21 +115,21 @@ public class SphereNode extends Node {
     @Override
     public void renderOn(Canvas canvas, int color) {
         canvas.noStroke();
-        Cartesian3 c = (Cartesian3) coordinate;
+        Coordinate c = coordinate;
         int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
         canvas.fill(r, g, b);
         float halfX = Config.X / 2, halfY = Config.Y / 2;
-        canvas.ellipse(c.x * Config.X + halfX + +Config.CANVAS_MARGIN, c.y * Config.Y + halfY + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
+        canvas.ellipse(c.getScreenX(), c.getScreenY(), Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
     void renderEdgeTo(Canvas canvas, Node other, int color) {
         canvas.stroke(color);
-        Cartesian3 a = (Cartesian3) coordinate, o = (Cartesian3) ((SphereNode) other).coordinate;
+        Coordinate a = coordinate, o = other.coordinate;
         float halfX = Config.X / 2, halfY = Config.Y / 2;
-        canvas.line(a.x * Config.R + halfX + Config.CANVAS_MARGIN,
-                a.y * Config.R + halfY + Config.CANVAS_MARGIN,
-                o.x * Config.R + halfX + Config.CANVAS_MARGIN,
-                o.y * Config.R + halfY + Config.CANVAS_MARGIN);
+        canvas.line(a.getScreenX(),
+                a.getScreenY(),
+                o.getScreenX(),
+                o.getScreenY());
     }
 }

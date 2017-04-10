@@ -22,9 +22,8 @@ public abstract class Node implements Comparable<Node>, Drawable {
 
     private int _index = innerIndex++;
     static int[] colors;
-
     static {
-        int color = 255, total = 100, step = 255 / total;
+        int color = 255, total = 200, step = 255 / total;
         colors = new int[total];
         for (int i = 0; i < total; i++) {
             colors[i] = ThreadLocalRandom.current().nextInt(0x30, 0xde)
@@ -34,7 +33,7 @@ public abstract class Node implements Comparable<Node>, Drawable {
     }
 
     int coloringIndex;
-
+    public int degreeWhenRemoved;
     public int getColoringIndex() {
         return coloringIndex;
     }
@@ -78,7 +77,6 @@ public abstract class Node implements Comparable<Node>, Drawable {
     ;
 
     abstract void renderOn(Canvas canvas, int color);
-
     abstract void renderEdgeTo(Canvas canvas, Node other, int color);
 
     public void renderEdgeTo(Canvas canvas, Node other) {
@@ -100,11 +98,11 @@ public abstract class Node implements Comparable<Node>, Drawable {
                 }
                 connected.add(node);
                 node.getConnected().add(this);
-                if (Config.WILL_DRAW) {
-                    target.push(c -> {
-                        renderEdgeTo(c, node);
-                    });
-                }
+//                if (Config.WILL_DRAW) {
+//                    target.push(c -> {
+//                        renderEdgeTo(c, node);
+//                    });
+//                }
             }
         }
     }

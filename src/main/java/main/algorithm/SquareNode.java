@@ -10,8 +10,14 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class SquareNode extends Node {
     public static class Cartesian extends Coordinate {
-        public float x;
-        public float y;
+        float getScreenX() {
+            return getX() * Config.R + Config.CANVAS_MARGIN;
+        }
+
+        @Override
+        float getScreenY() {
+            return getY() * Config.R + Config.CANVAS_MARGIN;
+        }
 
         @Override
         public String toString() {
@@ -29,8 +35,8 @@ public class SquareNode extends Node {
             int idx = 0;
 
             // put self at the end to make sure at least one iteration
-            int[] dx = {1, 1, 0, 1, 0};
-            int[] dy = {-1, 0, 1, 1, 0};
+            int[] dx = {1, 1, 0, 1};
+            int[] dy = {-1, 0, 1, 1};
 
             public Iterator(float x, float y) {
                 this.x = (int) Math.floor(x / Config.LEGAL_DISTANCE);
@@ -44,12 +50,11 @@ public class SquareNode extends Node {
 
             @Override
             public String next() {
-                int x = this.x + dx[idx],
-                        y = this.y + dy[idx++];
-                while (x >= MAX_X || y >= MAX_Y || x < 0 || y < 0) {
-                    x = this.x + dx[idx];
-                    y = this.y + dy[idx++];
-                }
+                int x = this.x + dx[idx], y = this.y + dy[idx++];
+//                while (x >= MAX_X || y >= MAX_Y || x < 0 || y < 0) {
+//                    x = this.x + dx[idx];
+//                    y = this.y + dy[idx++];
+//                }
                 return String.format(cellFormat, x, y);
             }
         }
@@ -68,8 +73,9 @@ public class SquareNode extends Node {
 
         @Override
         public void randomlyInit() {
-            this.x = ThreadLocalRandom.current().nextFloat();
-            this.y = ThreadLocalRandom.current().nextFloat();
+            setX(ThreadLocalRandom.current().nextFloat());
+            ;
+            setY(ThreadLocalRandom.current().nextFloat());
         }
 
         @Override
@@ -101,14 +107,18 @@ public class SquareNode extends Node {
         canvas.noStroke();
         int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
         canvas.fill(r, g, b);
-        Cartesian c = (Cartesian) coordinate;
-        canvas.ellipse(c.x * Config.X + Config.CANVAS_MARGIN, c.y * Config.Y + Config.CANVAS_MARGIN, Config.NODE_SIZE, Config.NODE_SIZE);
+        Coordinate c = coordinate;
+        float halfX = Config.X / 2, halfY = Config.Y / 2;
+        canvas.ellipse(c.getScreenX(), c.getScreenY(), Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
     void renderEdgeTo(Canvas canvas, Node other, int color) {
         canvas.stroke(color);
-        Cartesian a = (Cartesian) coordinate, o = (Cartesian) ((SquareNode) other).coordinate;
-        canvas.line(a.x * Config.X + Config.CANVAS_MARGIN, a.y * Config.Y + Config.CANVAS_MARGIN, o.x * Config.X + Config.CANVAS_MARGIN, o.y * Config.Y + Config.CANVAS_MARGIN);
+        Coordinate a = coordinate, o = other.coordinate;
+        canvas.line(a.getScreenX(),
+                a.getScreenY(),
+                o.getScreenX(),
+                o.getScreenY());
     }
 }
