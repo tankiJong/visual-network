@@ -116,15 +116,23 @@ public class SphereNode extends Node {
     public void renderOn(Canvas canvas, int color) {
         canvas.noStroke();
         Coordinate c = coordinate;
-        int r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
-        canvas.fill(r, g, b);
+        float r = (color & 0xFF0000) >> 16, g = (color & 0x00FF00) >> 8, b = (color & 0x0000FF);
+        if (((Cartesian3) coordinate).z >= 0) {
+            canvas.fill(r, g, b);
+        } else {
+            canvas.fill(r + 0.7f * (255 - r), g + 0.7f * (255 - g), b + 0.7f * (255 - b));
+        }
         float halfX = Config.X / 2, halfY = Config.Y / 2;
         canvas.ellipse(c.getScreenX(), c.getScreenY(), Config.NODE_SIZE, Config.NODE_SIZE);
     }
 
     @Override
     void renderEdgeTo(Canvas canvas, Node other, int color) {
-        canvas.stroke(color);
+        if (((Cartesian3) coordinate).z >= 0) {
+            canvas.stroke(color);
+        } else {
+            canvas.stroke(color + 0.7f * (255 - color));
+        }
         Coordinate a = coordinate, o = other.coordinate;
         float halfX = Config.X / 2, halfY = Config.Y / 2;
         canvas.line(a.getScreenX(),

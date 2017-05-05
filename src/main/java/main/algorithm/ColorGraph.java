@@ -108,14 +108,22 @@ public class ColorGraph extends Graph {
         });
         int V = 0;
         int E = 0;
+        float dominated = 0;
         for (Node node : nodes) {
+            node.visited = false;
+        }
+        for (Node node : nodes) {
+            if (node.getColorIndex() == i || node.getColorIndex() == j) {
+                V++;
+                for (Node n : node.getConnected()) {
+                    if (n.visited) continue;
+                    dominated++;
+                    n.visited = true;
+                }
+            }
             if (node.getColorIndex() != i) continue;
-            V++;
             this.renderTarget.push(node);
             for (Node connected : node.getConnected()) {
-                if (connected.getColorIndex() == i) {
-                    int xx = 1;
-                }
                 assert connected.getColorIndex() != i;
                 assert !connected.equals(node);
                 if (connected.getColorIndex() != j) continue;
@@ -126,8 +134,8 @@ public class ColorGraph extends Graph {
                 E++;
             }
         }
-        E = E / 2;
         String name = "bipartite-" + i + "-" + j + " V-" + V + "E-" + E + ".jpg";
+        System.out.println("domination: " + dominated / Config.NODE_AMOUNT);
         this.renderTarget.push(c -> {
             c.save(name);
         });

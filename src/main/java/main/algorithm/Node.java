@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class Node implements Comparable<Node>, Drawable {
     Coordinate coordinate;
     private static int innerIndex = 0;
-
+    public boolean visited = false;
     public int getInnerIndex() {
         return _index;
     }

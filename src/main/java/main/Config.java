@@ -13,7 +13,7 @@ public class Config {
     public static final int Z = Config.R;
     public static final int CANVAS_MARGIN = 10;
     public static int NODE_SIZE = R / 200;
-    //    public static final float LEGAL_DISTANCE = (float) (Math.sqrt(0.5 * (float) AVG_DEGREE / (float) NODE_AMOUNT)); // for disk
+    //        public static final float LEGAL_DISTANCE = (float) (Math.sqrt(0.5 * (float) AVG_DEGREE / (float) NODE_AMOUNT)); // for disk
 //    public static final float LEGAL_DISTANCE = (float) (Math.sqrt(AVG_DEGREE/(float)NODE_AMOUNT/Math.PI)); // for square
     public static final float LEGAL_DISTANCE = (float) (Math.sqrt(AVG_DEGREE / (float) NODE_AMOUNT)); // for shpere
     public static final float LEGAL_SQUARE_DISTANCE = LEGAL_DISTANCE * LEGAL_DISTANCE;

@@ -89,7 +89,7 @@ public class Canvas extends PApplet implements Executable
     {
         //this.updateCamera();
         if(this.queue.isEmpty()) return;
-        for (int i = 0; i < 100000 && !this.queue.isEmpty(); i++) {
+        for (int i = 0; i < 100 && !this.queue.isEmpty(); i++) {
             Drawable d = this.queue.poll();
             d.renderOn(this);
         }
