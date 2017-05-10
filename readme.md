@@ -15,7 +15,7 @@ Through adding additional JVM flags `-Xmx4200m -Xms4200m -Xmn4g`, the program ex
 The benchmarks indicates that the program cost linear time to do all works. Specifically, it cost about 20 seconds to execute when there are 128000 vertices and the average degree is 128.
 
 ### Show cases:
-![statistic-showcase](https://github.com/tankiJong/visual-network/blob/master/network-showcase.png?raw=true)
+![statistic-showcase](https://github.com/tankiJong/visual-network/blob/master/statistic-showcase.png?raw=true)
 
 left to right, top to bottom: backbone 1,2; node position visualization; node degree distribution; color class distribution; smallest last ordering process statistics - degree when deleted VS original degree
 
