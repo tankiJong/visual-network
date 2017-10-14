@@ -1,0 +1,283 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     11461,        275]
+NotebookOptionsPosition[     10926,        253]
+NotebookOutlinePosition[     11292,        269]
+CellTagsIndexPosition[     11249,        266]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"mainColor", "=", " ", 
+   RowBox[{
+    RowBox[{"RGBColor", "[", 
+     RowBox[{".68", ",", ".3", ",", ".19", ",", "#"}], "]"}], "&"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"gray", "=", " ", 
+   RowBox[{"GrayLevel", "[", 
+    RowBox[{".9", ",", "1"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"draw", "[", 
+    RowBox[{"type_", ",", " ", "n_", ",", " ", "deg_"}], "]"}], ":=", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{"Function", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"path", ",", "data"}], "}"}], ",", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Export", "[", 
+           RowBox[{
+            RowBox[{"path", "<>", "#1"}], ",", "#2", ",", " ", 
+            RowBox[{"RasterSize", "\[Rule]", "512"}], ",", " ", 
+            RowBox[{"ImageResolution", "\[Rule]", " ", "256"}]}], "]"}], 
+          "&"}], "@@@", 
+         RowBox[{"{", "\[IndentingNewLine]", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"\"\<node-distribution.jpg\>\"", ",", 
+             RowBox[{"Histogram", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"#2", " ", "&"}], "@@@", "data"}], ",", 
+               RowBox[{"{", "1", "}"}], ",", " ", 
+               RowBox[{"ColorFunction", "\[Rule]", 
+                RowBox[{"Function", "[", 
+                 RowBox[{
+                  RowBox[{"{", "height", "}"}], ",", 
+                  RowBox[{"Opacity", "[", "height", "]"}]}], "]"}]}], ",", 
+               RowBox[{"ChartStyle", "\[Rule]", 
+                RowBox[{"mainColor", "[", "1", "]"}]}]}], "]"}]}], "}"}], ",",
+            "\[IndentingNewLine]", 
+           RowBox[{"{", 
+            RowBox[{"\"\<degree-deleted.jpg\>\"", ",", 
+             RowBox[{"ListPlot", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"SortBy", "[", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"#4", ",", "#2"}], "}"}], "&"}], "@@@", "data"}], 
+                   ",", " ", "First"}], "]"}], ",", " ", 
+                 RowBox[{"SortBy", "[", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"#4", ",", "#5"}], "}"}], "&"}], "@@@", "data"}], 
+                   ",", " ", "First"}], "]"}]}], "}"}], ",", " ", 
+               RowBox[{"Filling", "\[Rule]", "Axis"}], ",", 
+               RowBox[{"FillingStyle", "\[Rule]", 
+                RowBox[{"{", 
+                 RowBox[{
+                  RowBox[{"1", "\[Rule]", "gray"}], ",", 
+                  RowBox[{"2", "\[Rule]", 
+                   RowBox[{"mainColor", "[", ".3", "]"}]}]}], "}"}]}], ",", 
+               " ", 
+               RowBox[{"PlotStyle", "\[Rule]", 
+                RowBox[{"{", " ", 
+                 RowBox[{
+                  RowBox[{"GrayLevel", "[", 
+                   RowBox[{".7", ",", "1"}], "]"}], ",", " ", 
+                  RowBox[{"mainColor", "[", ".5", "]"}]}], "}"}]}]}], "]"}]}],
+             "}"}], ",", "\[IndentingNewLine]", 
+           RowBox[{"{", 
+            RowBox[{"\"\<color-distribution.jpg\>\"", ",", 
+             RowBox[{"Histogram", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"#3", "&"}], "@@@", "data"}], ",", 
+               RowBox[{"{", "1", "}"}], ",", 
+               RowBox[{"ColorFunction", "\[Rule]", 
+                RowBox[{"Function", "[", 
+                 RowBox[{
+                  RowBox[{"{", "height", "}"}], ",", 
+                  RowBox[{"Opacity", "[", "height", "]"}]}], "]"}]}], ",", 
+               RowBox[{"ChartStyle", "\[Rule]", 
+                RowBox[{"mainColor", "[", "1", "]"}]}]}], "]"}]}], "}"}]}], 
+          "\[IndentingNewLine]", "}"}]}]}], "]"}], "@@", 
+      RowBox[{"{", 
+       RowBox[{"#", ",", 
+        RowBox[{
+         RowBox[{"Import", "[", 
+          RowBox[{"#", "<>", "\"\<distribution.csv\>\""}], "]"}], "[", 
+         RowBox[{"[", 
+          RowBox[{"2", ";;"}], "]"}], "]"}]}], "}"}]}], "&"}], "@", 
+    RowBox[{"TextString", "@", 
+     RowBox[{"StringForm", "[", 
+      RowBox[{
+      "\"\</Users/tanki/Documents/CSE-7350/network/`1`-node-`2`-avg-`3`/\>\"",
+        ",", "type", ",", "n", ",", "deg"}], "]"}]}]}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.700524506602807*^9, 3.700524526929031*^9}, {
+   3.700524581049596*^9, 3.700524583920065*^9}, {3.700524854847823*^9, 
+   3.700524861349506*^9}, {3.700571142524529*^9, 3.7005711438798027`*^9}, {
+   3.700571180496169*^9, 3.7005712994907713`*^9}, {3.700571356891363*^9, 
+   3.700571357924679*^9}, {3.70057157668688*^9, 3.700571576875164*^9}, {
+   3.7005716668803663`*^9, 3.7005716670224247`*^9}, {3.700571768341263*^9, 
+   3.700571812020299*^9}, {3.700573229849468*^9, 3.7005732319182463`*^9}, {
+   3.7005741154255953`*^9, 3.700574131936036*^9}, {3.700574167569566*^9, 
+   3.700574176574156*^9}, {3.7005742344539843`*^9, 3.700574235050069*^9}, {
+   3.700574342391522*^9, 3.7005744873431263`*^9}, {3.700578272410342*^9, 
+   3.7005782852658377`*^9}, {3.7005783217159853`*^9, 3.700578323879994*^9}, {
+   3.700578480416911*^9, 3.700578483250051*^9}, {3.700578587055461*^9, 
+   3.700578604256559*^9}, 3.7005786721653852`*^9, {3.700579217059623*^9, 
+   3.7005792458337183`*^9}, {3.7005794116130953`*^9, 
+   3.7005794185908747`*^9}, {3.700579543466112*^9, 3.70057955385332*^9}, 
+   3.700579672730742*^9, 3.700579799897691*^9, {3.70057985059464*^9, 
+   3.700579851846857*^9}, {3.700580011901353*^9, 3.700580014365507*^9}, {
+   3.70058024242176*^9, 3.700580449105135*^9}, {3.700580501073566*^9, 
+   3.7005805283613977`*^9}, {3.700580562792982*^9, 3.700580672689331*^9}, {
+   3.700580707583942*^9, 3.70058076110856*^9}, {3.700580797893962*^9, 
+   3.700580850860626*^9}, {3.700580910581933*^9, 3.700580987036001*^9}, {
+   3.7005810298462667`*^9, 3.700581034871024*^9}, {3.700581068341661*^9, 
+   3.7005810980459337`*^9}, {3.70058113324093*^9, 3.7005811784536657`*^9}, {
+   3.7005813436528473`*^9, 3.700581540568241*^9}, {3.700581733266616*^9, 
+   3.700581799622431*^9}, {3.700581865648542*^9, 3.700581883105839*^9}, {
+   3.700582337972556*^9, 3.700582339187667*^9}, {3.7005825900533867`*^9, 
+   3.7005826070473433`*^9}, {3.700582654257963*^9, 3.70058265836451*^9}, {
+   3.7005826934509087`*^9, 3.700582698505908*^9}, {3.700585925314932*^9, 
+   3.7005859391595984`*^9}, {3.700585991792582*^9, 3.700585998691783*^9}, {
+   3.7005860504329023`*^9, 3.7005860799438477`*^9}, {3.7005861340435038`*^9, 
+   3.7005861687505283`*^9}, {3.700762880862318*^9, 3.700762999455368*^9}, {
+   3.700763062554083*^9, 3.700763198466778*^9}, {3.700763266545134*^9, 
+   3.7007632777738934`*^9}, {3.700763307873274*^9, 3.700763386458181*^9}, {
+   3.700765122285733*^9, 3.700765140974908*^9}, {3.700765173636568*^9, 
+   3.700765174091269*^9}, {3.700765210472117*^9, 3.70076521359276*^9}, {
+   3.700765284087517*^9, 3.7007652849611263`*^9}, {3.700765414318825*^9, 
+   3.700765422432933*^9}, {3.700765452580473*^9, 3.7007654651238317`*^9}, {
+   3.700765495901782*^9, 3.700765511376391*^9}, {3.700765546074188*^9, 
+   3.700765586215188*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"pairs", " ", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"\"\<square\>\"", ",", " ", "1000", ",", "32"}], "}"}], ",", " ", 
+    RowBox[{"{", 
+     RowBox[{"\"\<square\>\"", ",", " ", "4000", ",", "64"}], "}"}]}], 
+   RowBox[{"(*", 
+    RowBox[{",", " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<square\>\"", ",", " ", "16000", ",", "64"}], "}"}]}], 
+    "*)"}], 
+   RowBox[{"(*", 
+    RowBox[{",", 
+     RowBox[{"{", 
+      RowBox[{"\"\<square\>\"", ",", " ", "64000", ",", "64"}], "}"}], ",", 
+     " ", 
+     RowBox[{"{", 
+      RowBox[{"\"\<square\>\"", ",", " ", "64000", ",", "128"}], "}"}]}], 
+    "*)"}], "}"}]}], "\[IndentingNewLine]", 
+ RowBox[{"draw", "@@@", "pairs"}]}], "Input",
+ CellChangeTimes->{{3.700581900227249*^9, 3.700581904256093*^9}, {
+   3.7005820082853518`*^9, 3.700582009081839*^9}, {3.7005828112218246`*^9, 
+   3.700582824469163*^9}, {3.700582888971081*^9, 3.7005828913147573`*^9}, 
+   3.7007632436029053`*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"square\"\>", ",", "1000", ",", "32"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"square\"\>", ",", "4000", ",", "64"}], "}"}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{
+  3.700763260013317*^9, {3.7007633245646267`*^9, 3.700763392827758*^9}, 
+   3.700765145071773*^9, 3.700765180875638*^9, 3.700765218973884*^9, 
+   3.7007654293158216`*^9, 3.7007654677868032`*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"/Users/tanki/Documents/CSE-7350/network/square-node-1000-avg-\
+32/node-distribution.jpg\"\>", 
+     ",", "\<\"/Users/tanki/Documents/CSE-7350/network/square-node-1000-avg-\
+32/degree-deleted.jpg\"\>", 
+     ",", "\<\"/Users/tanki/Documents/CSE-7350/network/square-node-1000-avg-\
+32/color-distribution.jpg\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\<\"/Users/tanki/Documents/CSE-7350/network/square-node-4000-avg-\
+64/node-distribution.jpg\"\>", 
+     ",", "\<\"/Users/tanki/Documents/CSE-7350/network/square-node-4000-avg-\
+64/degree-deleted.jpg\"\>", 
+     ",", "\<\"/Users/tanki/Documents/CSE-7350/network/square-node-4000-avg-\
+64/color-distribution.jpg\"\>"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.700763260013317*^9, {3.7007633245646267`*^9, 3.700763392827758*^9}, 
+   3.700765145071773*^9, 3.700765180875638*^9, 3.700765218973884*^9, 
+   3.7007654293158216`*^9, 3.700765471842475*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"SetDirectory", "[", 
+   RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";"}]], "Input",
+ CellChangeTimes->{{3.7005847209835987`*^9, 3.700584742912334*^9}, {
+   3.70058481598425*^9, 3.700584817099001*^9}, {3.700585800778706*^9, 
+   3.7005858056576147`*^9}, 3.700586090595482*^9, {3.70059285340654*^9, 
+   3.700592856003055*^9}}],
+
+Cell[BoxData[
+ RowBox[{"F", "@@", 
+  RowBox[{"{", 
+   RowBox[{"1", ",", "2"}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.700762956260294*^9, 3.700762959634124*^9}}],
+
+Cell[BoxData["Export"], "Input",
+ CellChangeTimes->{{3.700763018087133*^9, 3.7007630226573057`*^9}}]
+},
+WindowSize->{1329, 925},
+WindowMargins->{{Automatic, 77}, {Automatic, 0}},
+FrontEndVersion->"11.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (2016\:5e749\
+\:670821\:65e5)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 7270, 148, 355, "Input"],
+Cell[CellGroupData[{
+Cell[7853, 172, 985, 25, 54, "Input"],
+Cell[8841, 199, 443, 11, 32, "Output"],
+Cell[9287, 212, 988, 20, 138, "Output"]
+}, Open  ]],
+Cell[10290, 235, 363, 7, 46, "Input"],
+Cell[10656, 244, 163, 4, 32, "Input"],
+Cell[10822, 250, 100, 1, 46, "Input"]
+}
+]
+*)
+

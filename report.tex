@@ -1,0 +1,608 @@
+% This is a sample file for ACM small trim journals
+%
+% Compilation using 'acmsmall.cls' - version 1.3 (March 2012), Aptara Inc.
+% (c) 2010 Association for Computing Machinery (ACM)
+%
+% Questions/Suggestions/Feedback should be addressed to => "acmtexsupport@aptaracorp.com".
+% Users can also go through the FAQs available on the journal's submission webpage.
+%
+% Steps to compile: latex, bibtex, latex latex
+%
+% For tracking purposes => this is v1.3 - March 2012
+
+\documentclass[prodmode,acmtecs]{acmsmall} % Aptara syntax
+
+% Package to generate and customize Algorithm as per ACM style
+\usepackage[ruled]{algorithm2e}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{extarrows}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{pgffor}
+\usepackage{fancyhdr}
+\usepackage{csvsimple}
+\renewcommand{\algorithmcfname}{ALGORITHM}
+\renewcommand{\arraystretch}{1.5}
+\SetAlFnt{\small}
+\SetAlCapFnt{\small}
+\SetAlCapNameFnt{\small}
+\SetAlCapHSkip{0pt}
+\IncMargin{-\parindent}
+\fancyhf{}
+
+% Document starts
+\begin{document}
+
+% Title portion
+\title{CSE 7350 Prjoect Report - Wireless Sensor Network}
+\author{Tianyi Zhang
+    \affil{Southern Methodist University}}
+
+\maketitle
+
+\section{Executive Summary}
+\emph{Random geometric Graph} (RGG) is a kind of network, constructed by randomly placing N nodes in some metric space (according to a specified probability distribution) and connecting two nodes by a link if and only if their distance is in a given range\cite{wiki:rgg}. 
+
+In this project, certain algorithms of some aspect about RGG are implemented, like building RGG, coloring nodes according some specific requirement, finding the best backbone of the network.
+
+The core computation and visualization are based on $Java$ combined with the $Processing$ library. Through adding additional JVM flags, the program execution can be speedup. In addition, $Mathematica$ is utilized to render data plots.
+The benchmarks indicates that the program cost linear time to do all works. Specifically, it cost about 20 seconds to execute when there are 128000 vertices and the average degree is 128.
+
+\subsection{Introduction and Summary}
+
+\subsection{Programming Environment Description}
+
+In this section, I will clarify the software and hardware environment.
+
+There remain several languages, that is, C/C++, Java, C\#, JavaScript, available if I take into account my personal preference, which I want to develop on Mac. Since I have to concern about different pros and cons of a specific language to make a decision, I technically validated all these languages and present the results in Table~\ref{tab:one}.
+
+\begin{table}
+    \tbl{Comparation among different languages\label{tab:one}}{%
+        \resizebox{\linewidth} {\height}{%
+            \setlength\tabcolsep{2pt}%
+            \begin{tabular}{|c|m{0.4\linewidth}|m{0.4\linewidth}|}\hline
+                Name       & Pros                                                                                       & Cons                                                                                 \\\hline
+                C/C++      & Best performance                                                                           & Need to take care the dependencies by myself, least resources of drawing library     \\\hline
+                Java       & Drawing library like \emph{Processing} available, fairly good performance                  & Bad language syntax design                                                           \\\hline
+                C\#        & Perfect language design, many modern language features, fairly good performance            & lack of high level drawing library, can only use openGL if utilizing \emph{.NetCore} \\\hline
+                JavaScript & Various third libraries avaliable on NPM, elegant visualization through modern web browser & Bad performance when dealing with computationally intensive tasks{$^a$}.             \\\hline 
+            \end{tabular}}}
+    \begin{tabnote}%
+        \tabnoteentry{$^a$}{Node.js supports C++ add-on to provide the ability to solve the performance problem. That means the project will be separated into three parts. In the first part, algorithms implemented in C++ ensure the running time acceptable when the input size becomes much bigger. In the second part, the web page accepts drawing operations previously defined in customized protocol from WebSocket. In the last part, a glue layer developed in Node.js will combine C++ implementation and the web drawing part together. In this layer, the JavaScript engine will use the output computed by the first part through Node C++ add-on to further translate and send operation through WebSocket.}
+    \end{tabnote}%
+\end{table}
+
+I tried to find the balance between performance and development speed and finally chose Java to develop the project. Because Java has better performance than JavaScript and will cost less developing time compared with Node.js plan or with C++. At the same time, I do not need to encapsulate the drawing library which would be the main task when I chose C\# so that I can focus more on the algorithm implementation and visualization effect.
+
+The development and tests are all done on \emph{MacBook Pro, 2015 Model}. Detailed debeloping environment information are specified in Table~\ref{tab:two}.
+
+\begin{table}
+    \tbl{Developing environment information\label{tab:two}}{%
+        \begin{tabular}{|c|m{0.5\linewidth}|} \Xhline{1pt}
+            \multicolumn{2}{|c|}{\textbf{Hardware Infomation}} \\\hline
+            Device Modal & MacBook Pro(Retina, 13-inch, Early 2015)                        \\\hline
+            Processor    & 2.7 GHz Intel Core i5                                           \\\hline
+            RAM          & 8 GB 1867 MHz DDR3                                              \\\hline
+            GPU          & Intel Iris Graphic 6100 1536 MB                                 \\\Xhline{1pt}
+            \multicolumn{2}{|c|}{\textbf{Language and Runtime Infomation}} \\\hline
+            Language     & Java                                                            \\\hline
+            Compiler     & 1.8.0                                                           \\\hline
+            JVM          & Java HotSpot(TM) 64-Bit Server VM (build 25.60-b23, mixed mode) \\\hline
+            3rd library  & Processing 3.2.3                                                \\\Xhline{1pt}
+        \end{tabular}}
+\end{table}
+
+\section{Wireless Sensor Network Backbone Report}
+\subsection{Reduction to Practice}
+The whole program should include the following 4 steps.
+\begin{enumerate}
+    \item Generate a certain amount of nodes in a specific space.
+    \item According to some requirement, build connections(edges) among nodes so that a network(undirected graph) is generated.
+    \item Color the graph.
+    \item Use the coloring results to build the backbone(bipartite) and evaluate them.
+\end{enumerate}
+This section will Introduce the algorithm used for each step and the detailed implementation.
+\subsubsection{Random Geometric Graph Generation}
+\label{sec:rggg}
+\paragraph{Formal Description of The Generator}
+Before generating point, We will first define random value generator. $Rnd(low, high)$, where, the range of $Rnd$ is $[low, high]$.
+
+In the first step, the program needs to generate a set $V$ of uniformly distributed points in a specific bounded metric space $\mathcal{R}^n$. For $\forall{\vec{N_0}}\in{V}$, the following relations exist:
+\begin{description}
+    \item[Points on a unit square]
+    \begin{equation}
+        \label{eqn:01}
+        \vec{N_0} =
+        \left[
+            \begin{array}{c}
+                x \\ y
+            \end{array}
+        \right],
+    \end{equation}
+    where $x,y\in{[0,1]}$.
+    \item[Points on a unit disk \cite{DiskPoin82:online}]
+    \begin{equation}
+        \label{eqn:02}
+        \left\{
+            \begin{array}{c}
+                \vec{N_0} = 
+                \left[
+                    \begin{array}{c}
+                        x \\ y
+                    \end{array}
+                \right] = 
+                \left[
+                    \begin{array}{c}
+                        \sqrt{r}cos\theta \\ 
+                        \sqrt{r}sin\theta 
+                    \end{array}
+                \right] \\
+                r\in{[0,1]} \\
+                \theta\in(0, 2\pi]
+            \end{array}
+        \right.
+        \xLongrightarrow[r' \leftarrow Rnd(0,1)]{\theta' \leftarrow Rnd(0,2\pi)}
+        \vec{N_0} = 
+        \left[
+            \begin{array}{c}
+                \sqrt{r'}cos\theta' \\ 
+                \sqrt{r'}sin\theta'
+            \end{array}
+        \right].
+    \end{equation}
+    \item[Points on a unit sphere \cite{SpherePo5:online}]
+    \begin{equation}
+        \label{eqn:03}
+        \left\{
+            \begin{array}{c}
+                \vec{N_0} = 
+                \left[
+                    \begin{array}{c}
+                        x \\ y \\ z
+                    \end{array}
+                \right] = 
+                \left[
+                    \begin{array}{c}
+                        \sqrt{1-u^2}cos\theta \\ 
+                        \sqrt{1-u^2}sin\theta \\
+                        u
+                    \end{array}
+                \right] \\
+                u\in{[-1,1]} \\
+                \theta\in(0, 2\pi]
+            \end{array}
+        \right.
+        \xLongrightarrow[u' \leftarrow Rnd(0,1)]{\theta' \leftarrow Rnd(0, 2\pi)}
+        \vec{N_0} = 
+        \left[
+            \begin{array}{c}
+                \sqrt{1-u'^2}cos\theta' \\ 
+                \sqrt{1-u'^2}sin\theta' \\
+                u
+            \end{array}
+        \right].
+    \end{equation}
+\end{description}
+
+\paragraph{Program Implementation}
+Obviously, the core data of a node is coordinate and it's form changes when the shape of area varies. So I designed an abstract class $Coordinate$ to seal these detail. At the same time, some abstract method is declared. For example, private method $Void\ randomlyInit()$ should be implemented, inside which, all member values should be properly initialized, as well as API method $Double\ SquaredDistance(Coordinate, Coordinate)$, which is a tool function to calculate the distance in different dimensional space.
+
+The $Coordinate$ is a factory-like class. An instance with uniformly random coordinate is generated when the constructor is called every time. If we generate sufficient points and draw them on a canvas, we can get some figures like Fig~\ref{fig:one}, where the distribution of the points indicates that the methods described above work well.
+\begin{figure}
+\centerline{
+\subfigure[Square]{
+    \label{fig:one:a}
+    \includegraphics[width=1.5in]{node-square}}
+\subfigure[Disk]{
+    \label{fig:one:b}
+    \includegraphics[width=1.5in]{node-disk}}
+\subfigure[Sphere]{
+    \label{fig:one:c}
+    \includegraphics[width=1.5in]{node-sphere}}
+}
+\caption{Point Generation on different geometrical surface($|V| = 4000$)}
+\label{fig:one} %% label for entire figure
+\end{figure}
+
+
+\subsubsection{potential Edge Detection and Network Construction}
+\paragraph{Algorithm Description} algorithm~\ref{alg:edgebuildez} describes the naive network construction algorithm. Notice that the input range parameter is $R$, while the given input in benchmarks is the average degree $\overline{Deg}$. So we will now take a look at the conversion between $R$ and $\overline{Deg}$.
+
+In general cases, the amount of points is big enough that
+\begin{equation}
+\label{eqa:degandr}
+\frac{N_{points\,in\,the\,disk}}{N_{points\,in\,all}}
+\sim \frac{S_{disk}}{S_{whole\,area}},
+\end{equation}
+since the condition of forming an edge is the geometrical distance between two points is less than $R$, that is all point in such disk. Given the average degree $\overline{Deg}$, we can represent the average amount of points in the small disk area as $\overline{Deg}+1$, which is approximately equal to $\overline{Deg}$, that means
+\begin{equation}
+N_{points\,in\,the\,disk} \simeq \overline{Deg}.
+\end{equation}
+As mentioned in section~\ref{sec:rggg}, if the point set is $V$, we can describe the potential edge set $E$ as followed:
+\begin{equation}
+\label{eqn:edge}
+E \triangleq \{\langle P,Q\rangle\mid{P,Q\in{V}, \left|PQ\right|\leq{R}}\}.
+\end{equation}
+Combining equation~\ref{eqa:degandr} with $V$, The following relation exists to calculate $R$ from $\overline{Deg}$.
+\begin{equation}
+\label{eqn:avgdeg2r}
+\frac{\overline{Deg}}{|V|} = \frac{S(R)}{S_0} 
+\Rightarrow R = S^{-1}
+\left(\frac{\overline{Deg}}{|V|}S_0\right),
+\end{equation}
+where $S_0$ is the area of the shape, that is $S_{whole\,area}$, and $S(R)$ is the function to calculate $S_{disk}$, which takes an arbitrary point as the center, and its radius is $R$.
+\begin{algorithm}[t]
+\SetAlgoNoLine
+\KwIn{The Node set $V$, the range parameter $R$}
+\KwOut{The edge set $E$}
+E = \{\}\;
+\For{each node $\alpha \in{V}$}{
+    \For{each node $\beta \in{V}$}{
+        \If{$\left|\alpha\beta\right|\leq{R}$}{
+            E += $\{\langle\alpha,\beta\rangle\}$\;
+        }
+    }
+}
+\caption{Network Construction}
+\label{alg:edgebuildez}
+\end{algorithm}
+Algorithm~\ref{alg:edgebuildez} costs $O(|V|^2)$ to detect all potential edges. But apparently, many position of many points are so far from the certain point that we do not need to test them at all. Ideally, we would only need to test the point inside a disk. Based on this idea, the cell method is introduced.
+When a point is generated, it will be put into one of the cells, which together form the whole space. Each cell has its index $\omega$ and all indexes form an index set $I$:
+\begin{equation}
+\mathnormal{f}: V\to I, \omega = \mathnormal{f}(\vec{N_0}) \triangleq \lfloor\vec{N_0}/R\rfloor; I \subseteq \mathcal{Z}^n.
+\end{equation}
+Apparently, the $I$ is a finite set which is bounded according to the shape of the area. By this operation, we have to detect at most $3^{n} - 1$ cells to construct all edges in a specific cell. 
+
+But actually we only need to detect part of them. More concretely, when $n$ equals to 2, assume the index $\omega = (i,j)^\mathrm{T}$, we only need to detect 4 additional cells:
+\begin{equation}\centering
+\Delta(\omega) = 
+\left[
+    \begin{array}{c c c c}
+    1 & 1 & 0 & 1 \\
+    -1 & 0 & 1 & 1 \\
+    \end{array}
+\right]^\mathrm{T}+[\omega \dots \omega] = 
+\left[
+    \begin{array}{c c c c}
+        i+1 & i+1 & i & i+1 \\
+        j-1 & j & j+1 & j+1\\
+    \end{array}
+\right]
+\end{equation}
+Similarly, when $n$ equals to 3, assume the index $\omega = (i,j, k)^\mathrm{T}$, we only need to detect 10 additional cells:
+\begin{equation}
+\Delta(\omega) = 
+\left[
+    \begin{array}{c c c c c c c c c c}
+        1 & 1 & 0 & 0 & 1 & 1 & 0 & 1 & 1 & 0 \\
+        1 & 1 & 1 & 1 & 0 & 0 & 0 & -1 & -1 & -1 \\
+        1 & 0 & 1 & 0 & 0 & 1 & 1 & 1 & 0 & 1 \\
+    \end{array}
+\right]^\mathrm{T}+[\omega \dots \omega],
+\end{equation}
+which can be observed in figure~\ref{fig:cell:3d}.
+\begin{figure}
+\label{fig:cell}
+\centerline{
+\subfigure[n = 2]{
+    \label{fig:cell:2d}
+    \includegraphics[height=1.5in]{cell-2d}}
+\hspace{1in}
+\subfigure[n = 3]{
+    \label{fig:cell:3d}
+    \includegraphics[height=1.5in]{cell-3d}}
+}
+\caption{Cells need to detect in Cell method}
+\end{figure}
+
+For convenience, we use another function $\mathcal{V}$ to extract a subset $v$ of nodes from $V$, according a certain index $i$:
+\begin{equation}
+\mathcal{V}:I \to 2^V, \forall\vec{N_1},\forall\vec{N_2} \in \mathcal{V}(i) \Leftrightarrow \mathnormal{f}(\vec{N_1}) = \mathnormal{f}(\vec{N_2}).
+\end{equation}
+Now, we can design an optimized algoritm of Algorithm~\ref{alg:edgebuildez}, which is described in Algorithm~\ref{alg:edgebuildcell}. At the first glance, the algorithm has a higher complexity which is equivalent to $O(n^4)$ since it contains a 4-level nested loop. 
+\begin{algorithm}[t]
+\SetAlgoNoLine
+\KwIn{The Node set $V$, the Index set $I$, the range parameter $R$}
+\KwOut{The edge set $E$}
+E = \{\}\;
+\For{each index $i \in{I}$}{
+    \For{each node $\alpha \in{\mathcal{V}(i)}$}{
+        \For{each index $j \in{\Delta(\mathnormal{f}(\alpha))}$}{
+            \For{each node $\beta \in{\mathcal{V}(j)}$}{
+                \If{$\left|\alpha\beta\right|\leq{R}$}{
+                    E += $\{\langle\alpha,\beta\rangle\}$\;
+                }
+            }
+        }
+    }
+}
+return E;
+\caption{Network Construction with Cell Method}
+\label{alg:edgebuildcell}
+\end{algorithm}
+
+But actually it consumes far less time to build all edges.
+\begin{lemma}
+Algorithm~\ref{alg:edgebuildcell} spend linear time, $O(|V|)$ in specific, to detect all edges.
+\end{lemma}
+\begin{proof}
+
+Because the size of each cell is $R$, $|I|R^2 \simeq 1 \Leftrightarrow |I| \simeq \frac{1}{R^2}$ for a unit size square like space;
+
+There are about $\overline{Deg}$ nodes in a certain cell, so ${\mathcal{V}(i)} \simeq \overline{Deg}$, where $i \in I$;
+
+$\Delta(\mathnormal{f}(\alpha))$ is a constant varying according to different dimensions, where $ \alpha \in V$;
+
+Given $S(R) = \pi R^2$, according to  equation~\ref{eqn:avgdeg2r}, we can know that $R^2 \simeq \frac{\overline{Deg}}{|V|}$.
+So, the complexity of Algorithm~\ref{alg:edgebuildcell} is $O(\frac{\overline{Deg}^2}{R^2}) \simeq O(\overline{Deg}|V|) \simeq O(|V|)$.
+\end{proof}
+\paragraph{Program Implementation}
+For implementation executed in linear time, the program has to fulfill the following requirement:
+\begin{enumerate}
+\item an implementation of set of which can go through all elements inside and quickly.
+\item should be able to randomly access a cell of certain index very quickly.
+\end{enumerate}
+To reach (1), I utilized $ArrayList$ for node set and edge set. Compared with $HashSet$, $ArrayList$ is more efficient when doing an operation of adding, in the context that any element does not exist in the set for sure, while $HashSet$ need quite more time for the $contains$ operation when adding elements. To reach (2), I use an $HashMap\langle String, NodeSet\rangle$ to represent all cells. For $String$ here represents to an index, the implementation difference among different dimensions can be eased. At the same time, because the number of cells and possible indexes is determined when the program is initialized, the capacity of the $HashMap$ is a known value so that a possible performance issue related to resizing the capacity of the data structure will not exist.
+\begin{figure}[b]
+\label{fig:networkConseg}
+\centerline{
+\subfigure[~]{
+\label{fig:networkConseg:cell}
+    \includegraphics[width=1.2in]{walk-through//walk-through_1}
+    \includegraphics[width=1.2in]{walk-through//walk-through_2}}
+}
+\centerline{
+\subfigure[~]{
+\foreach \t in {3,...,6}{%
+    \includegraphics[width=1.2in]{walk-through//walk-through_\t}
+    }
+}}
+\subfigure[~]{
+\centerline{
+\begin{minipage}[b]{3.7in}
+    \foreach \t in {7,...,9}{%
+        \includegraphics[width=1.2in]{walk-through//walk-through_\t}
+        }\\
+    \foreach \t in {10,...,12}{%
+        \includegraphics[width=1.2in]{walk-through//walk-through_\t}
+        }
+\end{minipage}
+}
+}
+\caption{Network Construction walk through( $|V| = 20, R = 0.4$). Given a randomly generated 20 points on a unit square plane. If we set $R$ to 0.4, the whole plane will be divided into 9 cells. The network expends from the first cell, where the nodes are visited and connected to each other, then checked whether there should be a edge to other nodes in other 3 cells, to the last cell.}
+\end{figure}
+
+
+As an result, my implementation will spare very limited time for the operations on data structures. Figure~\ref{fig:networkCons} shows the visualized result of network construction when $|V|$ equals to 1000. Figure~\ref{fig:networkConseg} demonstrates a small example of the algorithm.
+\begin{figure}
+\centerline{
+\subfigure[Square]{
+    \label{fig:networkCons:a}
+    \includegraphics[width=1.5in]{node-edge-square}}
+\subfigure[Disk]{
+    \label{fig:networkCons:b}
+    \includegraphics[width=1.5in]{node-edge-disk}}
+\subfigure[Sphere]{
+    \label{fig:networkCons:c}
+    \includegraphics[width=1.5in]{node-edge-sphere}}
+}
+\caption{Network Construction on different geometrical surface( $|V| = 1000, \overline{Deg} = 8$)}
+\label{fig:networkCons}
+\end{figure}
+\subsubsection{Graph Coloring}
+\paragraph{Algorithm Description}
+Before introducing the algorithm, there are some notations.
+\begin{description}
+\item[Color Set] 
+$C \triangleq \{c \mid c\in\mathcal{N}\}$, where a certain color is represented by a natural number. 
+\item[Color Map]
+$\mathcal{C} \triangleq \{n \to c \mid n\in{V}, c\in{C}\}$, where an looking up operation is available: $\mathcal{C}[n] = c \text{or} NULL$.
+\end{description}
+In the project, Algorithm~\ref{alg:coloring}\cite{Matula:1983:SOC:2402.322385} is utilized for graph coloring. In Brief, there are two main steps to color the graph, which are smallest last ordering and greedy coloring.
+
+\begin{algorithm}[t]
+\SetAlgoNoLine
+\KwIn{The node set $V$, the edge set $E$}
+\KwOut{The color map $M$}
+$M$ = \{\}\;
+$C$ = \{\}\;
+$N_{sorted}$ = SmallestLastOrdering($V$, $E$)\;
+\For{$i\leftarrow 0$ \text{to} $|V|-1$}{ 
+    $\alpha$ = $N_{sorted}$[$i$]\; 
+    $E_0$ = $(\{\alpha\}\times{V}) \cap E$\;
+    $C_0$ = \{\}\;
+    \For{\text{each} $\langle \_, \beta\rangle$ \text{in} $E_0$}{
+        \If{$\mathcal{C}[\beta] \neq \text{NULL}$}{
+            $C_0$ += $\{\mathcal{C}[\beta]\}$\;
+        }
+    }
+    \If{$|C_0|$ = $|M|$}{
+        $c$ = \text{the smallest number} $\in (C - C0)$\;
+        $M$ += $\{\alpha \to c\}$\;
+    }\Else{
+        $M$ += $\{\alpha \to |C|\}$\;
+        $C$ += $\{|C|\}$\;
+    }
+}
+\caption{Graph Coloring Algorithm}
+\label{alg:coloring}
+\end{algorithm}
+
+As alforithm~\ref{alg:smallestlastordering} states, the main idea of the smallest-last ordering is recursively removing the node with least degree from the graph and update the degree, which is put into an stack $L$.
+
+\begin{algorithm}[t]
+\SetAlgoNoLine
+\KwIn{The node set $V$, the edge set $E$}
+\KwOut{Node list $L$}
+$L$ = []\;
+\Repeat{$V$ = $\Phi$}{
+    $N_0$ = Node with smallest degree in $V$\;
+    $E_0$ = $[(\{\alpha\}\times{V}) \cup (V\times\{\alpha\})] \cap E$\;
+    $E$ = $E$ - $E_0$\;
+    $L$.push($N_0$)\;
+    $V$ = $V$ - $N_0$\;
+}
+\caption{Smallest-last Ordering}
+\label{alg:smallestlastordering}
+\end{algorithm}
+
+Whether the smallest-last ordering is efficient depends on the efficiency to find the node with smallest degree from the graph. Algorithm~\ref{alg:linearsmallestlast} demonstrates a method. \textbf{:=} means this expression is lazy. It will be re-evaluate when the value is needed. $resort(V[p:])$ will sort the input start from $p$, according to the node degree. The algorithm will first initialize a pair list of node and its degree. Then when visiting a node, we update degree of other nodes adjacent to it, which will then bubble up according to the degree from the position, one by one. 
+
+At the same time, updating the degree of nodes adjacent to the node just removed averagely cost $O(\overline{Deg}) \simeq O(1)$. Thus It is apparent that:
+\begin{equation}
+\label{eqn:slo}
+T(n) = T(|V|) = \sum\limits_{i=0}^{|V|-1}O(\overline{Deg})+\mu(|V|-i) \simeq O(|V|) + \sum\limits_{i=1}^{|V|}\mu(i),
+\end{equation}
+where $\mu(i)$ represents to find the node with smallest degree from $i$ nodes.
+
+The next step is to color the nodes. Every time, a node is popped from $L$, colored with a color, which should be one that is different from other colors used by nodes adjacent to it. If all colors have been used, a new color will be picked, then added to the color set. The greedy strategy here means if there are still more than one color choices, the color represented by smallest number will be selected. Obviously, The execution time is promised to be $O(|V|)$, since the amount of nodes detected through the whole process is $O(\overline{Deg}|V|)$, according the definition of RGG.
+
+Hence, complexity of the coloring algorithm is sure to be $\Omega(|V|)$. The upper bound of the algorithm depends on $\mu(i)$ and it should at least be $O(|V|)$.
+
+\begin{algorithm}[t]
+\SetAlgoNoLine
+\KwIn{The sorted node list $V$, the edge set $E$}
+\KwOut{smallest-last ordering node list L}
+$p$ = 0\;
+\For{$i \leftarrow 0$ to $V$.length}{
+    $\alpha$ = $V[i]$\;
+    $deg$ := $|(\{\alpha\}\times{V}) \cap E|$\;
+    $V[i]$ = ($\alpha$, $deg$)\;
+}
+\Repeat{p = $V$.length}{
+    $(\alpha, _)$ = $V[i]$\;
+    $E_0$ = $(\{\alpha\}\times{V}) \cap E$\;
+    $E$ = $E$ - $E_0$\;
+    p++\;
+    resort($V[p:]$)\;
+}
+\caption{Smallest-last Ordering}
+\label{alg:linearsmallestlast}
+\end{algorithm}
+
+\paragraph{Program Implementation}
+The main issue have to be deal with in my implementation is about the function $resort$ and finding all adjacent nodes. 
+
+In the project, there is an unique index for each node, initialized after the node list is sorted according to the degree, which represents to the index of the node in the sorted list, so that we will spend $O(1)$ time to visit adjacent nodes. In addition, to speed up the $resort$ function, each node will locally bubble up, and this operation will be done in almost $O(1)$ time.
+\begin{figure}
+\label{fig:colorednode}
+\centerline{
+    \includegraphics[width=2.5in]{node-colored}}
+\caption{Colored Cells( $|V| = 1000, \overline{Deg} = 8$)}
+\end{figure}
+
+The Figure~\ref{fig:walkthroughcoloring1} and Figure~\ref{fig:walkthroughcoloring2} describe an example when there are 20 points and $R$ equals to $0.4$. Note that the first step of smallest-last ordering is put with the last step of greedy coloring together. Since the order is reversed for every node.
+
+\subsection{Benchmark Result Summary and Display}
+In the project, I did 13 benchmark cases, as stated in table~\ref{tab:benchmarkcase}.
+\begin{table}
+    \tbl{Benchmark Case Highlight\label{tab:benchmarkcase}}{%
+        \setlength\tabcolsep{2pt}%
+        \begin{tabular}{|c|m{0.15\linewidth}|m{0.15\linewidth}|m{0.2\linewidth}|}\hline
+            \# & $|V|$ & $\overline{Deg}$ & Distribution \\ \hline
+            1 & 1000 & 32 & Square \\ \hline
+            2 & 4000 & 64 & Square \\ \hline
+            3 & 16000 & 64 & Square \\ \hline
+            4 & 64000 & 64 & Square \\ \hline
+            5 & 64000 & 128 & Square \\ \hline
+            6 & 4000 & 64 & Disk \\ \hline
+            7 & 4000 & 128 & Disk \\ \hline
+            8 & 4000 & 64 & Sphere \\ \hline
+            9 & 16000 & 128 & Sphere \\ \hline
+            10 & 64000 & 128 & Sphere \\ \hline
+            11 & 128000 & 64 & Square \\ \hline
+            12 & 128000 & 64 & Disk \\ \hline
+            13 & 128000 & 128 & Sphere \\ \hline
+        \end{tabular}}
+\end{table}
+\paragraph{Benchmark detail} 
+The benchmark result data are listed in Table~\ref{tab:bmsum}. In Table~\ref{tab:bbsum}, The Domination percentages are calculated through the vertices covered in the backbone.
+
+From Figure 8 to Figure 20, totally 10 figures demonstrate the visualized result of benchmarks, which fully verified the implementations are correct.
+
+\begin{table}
+    \label{tab:bmsum}
+    \tbl{Benchmark Cases Summary}{%
+        \setlength\tabcolsep{2pt}%
+        %|m{0.15\linewidth}|m{0.2\linewidth}|%
+        \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}\hline
+             \bfseries \# & \bfseries $V$ & \bfseries $R$ & \bfseries $|E|$ & \bfseries $Deg_{min}$ & \bfseries $Deg_{max}$ & \bfseries deleted $Deg_{max}$ & \bfseries $N_{color}$ & \bfseries Color most used & \bfseries Clique  
+            \csvreader[head to column names]{benchmark//benchmark-summary.csv}{}
+            {\\\hline \num & \n & \r & \e & \mindeg & \maxdeg & \degdeleted & \color & \moscolorsiz & \clique}
+            \\\hline
+        \end{tabular}}
+\end{table}
+\begin{table}
+    \label{tab:bbsum}
+    \tbl{Backbone Summary}{%
+        \setlength\tabcolsep{2pt}%
+        %|m{0.15\linewidth}|m{0.2\linewidth}|%
+        \begin{tabular}{|c|c|c|c|c|}\hline
+             \bfseries \# &\bfseries $|V|$ & \bfseries $|E|$ & \bfseries Domination(\%) & \bfseries Face{$^a$}  
+            \csvreader[head to column names]{benchmark//backbone-summary.csv}{}
+            {\\\hline \num & \V & \E & \Domination & \Face}
+            \\\hline
+        \end{tabular}}
+        \begin{tabnote}
+        \tabnoteentry{$^a$}{The Euler formula, that is $F = |E|-|V|+1$, is applied to calculate the face amount for backbone on a sphere.}
+        \end{tabnote}
+\end{table}
+
+\begin{figure}
+
+\centerline{
+\begin{minipage}[b]{4.8in}
+\foreach \t in {0,...,9}{%
+\subfigure[~]{
+    \includegraphics[height=1.2in]{walk-through//walk-through_slo-\t}
+    \includegraphics[height=1.2in]{walk-through//walk-through_clr-\t}}
+}
+\end{minipage}}
+\caption{Coloring Example part one. (a) - (h) represents the smallest-last ordering from step 1 to step 10 and the greedy coloring reversely from step 20 to step 11.( $|V| = 20, R = 0.4$)}
+\label{fig:walkthroughcoloring1}
+\end{figure}
+
+\begin{figure}
+\centerline{
+\begin{minipage}[b]{4.8in}
+\foreach \t in {10,...,19}{%
+\subfigure[~]{
+    \includegraphics[height=1.2in]{walk-through//walk-through_slo-\t}
+    \includegraphics[height=1.2in]{walk-through//walk-through_clr-\t}}
+}
+\end{minipage}}
+\caption{Coloring Example part two. (a) - (h) represents the smallest ordering from step 11 to step 20 and the greedy coloring reversely from step 10 to step 1.( $|V| = 20, R = 0.4$)}
+\label{fig:walkthroughcoloring2}
+\end{figure}
+\foreach \t in {1,...,13}{%
+\begin{figure}
+\centerline{
+\subfigure[Generated Nodes and Backbone]{
+\includegraphics[height=2in]{benchmark//\t//node}
+\includegraphics[height=2in]{benchmark//\t//bipartite}}
+}
+\centerline{
+\subfigure[Statistic Visualization]{
+    \begin{minipage}[b]{2.7in}
+        \includegraphics[width=2.7in]{benchmark//\t//node-distribution}\\
+        \includegraphics[width=2.7in]{benchmark//\t//degree-deleted} \\
+        \includegraphics[width=2.7in]{benchmark//\t//color-distribution}
+    \end{minipage}}}
+\caption{Benchmark Case \t}
+\end{figure}
+}
+
+% Bibliography
+\bibliographystyle{ACM-Reference-Format-Journals}
+\bibliography{bibfile}
+% Sample .bib file with references that match those in
+% the 'Specifications Document (V1.5)' as well containing
+% 'legacy' bibs and bibs with 'alternate codings'.
+% Gerry Murray - March 2012
+
+\medskip
+                        
+\end{document}
